@@ -3,10 +3,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
 
 /**
  * Rovio控制接口
@@ -15,8 +13,8 @@ import java.net.UnknownHostException;
  * 
  */
 public class RovioInterface {
-	private int TIMEOUT = 100;
-	private int TIMEOUT_READ = 100;
+	private int TIMEOUT = 5000;
+	private int TIMEOUT_READ = 5000;
 	private String rovioaddress = null;
 	private String rovioport = null;
 	public int navsignal = 0;
@@ -233,6 +231,23 @@ public class RovioInterface {
 		} catch (IOException e) {
 		}
 	}
+	
+	public void testGetStatus(){
+		try {
+			String status = null;
+
+			status = "";
+			InputStream inputStream = requestHttp("/ScanWlan.cgi");
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					inputStream));
+			while((status=in.readLine())!=null){
+				System.out.println(status);
+			}
+			in.close();
+			inputStream.close();
+		} catch (IOException e) {
+		}
+	}
 
 	/**
 	 * 打印Rovio当前状态
@@ -265,25 +280,25 @@ public class RovioInterface {
 		requestHttp("/rev.cgi?Cmd=nav&action=18&drive="+direction+"&speed=" + speed+"&angle="+angle);
 	}
 	
-	public void test(String host){
-		try {
-			InetAddress.getByName(host).isReachable(3000);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public static void  test1(){
+		RovioInterface rovio = new RovioInterface("192.168.10.18", "80");
+		System.out.println(rovio.checkConnection());
+		rovio.updateStatus();
+		rovio.printStatus();
+		rovio.move(Direction.FORWARD, 1);
+	}
+	
+	public static void test2(){
+		RovioInterface rovio = new RovioInterface("192.168.10.18", "80");
+		System.out.println(rovio.checkConnection());
+		rovio.testGetStatus();
 	}
 	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		RovioInterface rovio = new RovioInterface("192.168.10.20", "80");
-		System.out.println(rovio.checkConnection());
-		rovio.updateStatus();
-		rovio.printStatus();
-		rovio.move(Direction.FORWARD, 1);
+		test2();
 	}
 
 }
